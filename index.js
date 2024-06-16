@@ -14,7 +14,6 @@ const db = new pg.Client({
   database: process.env.PG_DB,
   password: process.env.PG_PASSWORD,
   port: process.env.PG_PORT,
-  ssl: process.env.PG_SSL == 0 ? false : true
 });
 
 db.connect();
