@@ -1,14 +1,21 @@
 import express from "express";
+import http from "http";
+import https from "https";
 import bodyParser from "body-parser";
 import env from "dotenv";
-import pkg from "pg";
+import pg from "pg";
+import fs from "fs";
+
+const certificate = fs.readFileSync("/etc/letsencrypt/live/straynger.org-0001/fullchain.pem");
+const privateKey = fs.readFileSync("/etc/letsencrypt/live/straynger.org-0001/privkey.pem");
+const credentials = { key: privateKey, cert: certificate };
 
 const app = express();
-const port = 3000;
+const httpPort = 3000;
+const httpsPort = 3001;
 env.config();
 
-const { Pool } = pkg;
-const db = new Pool({
+const db = new pg.Client({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,
   database: process.env.PG_DB,
@@ -33,12 +40,19 @@ app.get("/users", async (req, res) => {
     }catch(err){
       console.log(err)
     }
-})
+});
   
 app.get("/", (req, res) => {
     res.send("Hello World!")
-})
+});
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-})
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
+
+app.listen(httpPort, () => {
+  console.log(`Http server is running on port ${httpPort}`);
+});
+
+app.listen(httpsPort, () => {
+  console.log(`Https server is running on port ${httpsPort}`);
+});
