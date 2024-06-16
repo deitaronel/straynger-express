@@ -1,18 +1,11 @@
 import express from "express";
 import http from "http";
-import https from "https";
 import bodyParser from "body-parser";
 import env from "dotenv";
 import pg from "pg";
-import fs from "fs";
-
-const certificate = fs.readFileSync("/etc/letsencrypt/live/straynger.org-0001/fullchain.pem");
-const privateKey = fs.readFileSync("/etc/letsencrypt/live/straynger.org-0001/privkey.pem");
-const credentials = { key: privateKey, cert: certificate };
 
 const app = express();
-const httpPort = 3000;
-const httpsPort = 3001;
+const port = 3000;
 env.config();
 
 const db = new pg.Client({
@@ -47,12 +40,7 @@ app.get("/", (req, res) => {
 });
 
 const httpServer = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
 
-app.listen(httpPort, () => {
-  console.log(`Http server is running on port ${httpPort}`);
-});
-
-app.listen(httpsPort, () => {
-  console.log(`Https server is running on port ${httpsPort}`);
+httpServer.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
